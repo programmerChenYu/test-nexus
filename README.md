@@ -2,9 +2,7 @@
 
 # test-nexus 🚀  
 
-![TestNG-Compatible](https://img.shields.io/badge/TestNG-Compatible-brightgreen) 
-
-![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)
+![TestNG-Compatible](https://img.shields.io/badge/TestNG-Compatible-brightgreen) ![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)
 
 ---
 
