@@ -41,6 +41,7 @@ public class TestNexusObjectFactory implements IObjectFactory {
             // 将Class转换为Bean名称（遵循与BeanFactory一致的命名规则）
             String beanName = Introspector.decapitalize(testClass.getSimpleName());
             // 使用字符串名称获取Bean
+            // 执行所有对象初始化后的用户自定义逻辑
             return beanFactory.getBean(beanName);
         }
         try {

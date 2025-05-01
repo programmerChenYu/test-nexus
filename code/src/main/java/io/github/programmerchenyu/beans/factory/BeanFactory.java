@@ -3,9 +3,10 @@ package io.github.programmerchenyu.beans.factory;
 import io.github.programmerchenyu.beans.BeanDefinition;
 import io.github.programmerchenyu.beans.exception.BeanCreationException;
 import io.github.programmerchenyu.beans.factory.annotation.Autowired;
+import io.github.programmerchenyu.beans.factory.annotation.InitAfter;
+import io.github.programmerchenyu.beans.factory.annotation.InitBefore;
 import io.github.programmerchenyu.chain.dependency.DependencyInjectionChain;
 import io.github.programmerchenyu.enums.chain.ProcessorEnum;
-import io.github.programmerchenyu.beans.factory.annotation.Init;
 
 import java.beans.Introspector;
 import java.lang.reflect.*;
@@ -53,8 +54,8 @@ public class BeanFactory {
         Object bean = createBeanInstance(definition);
         // 初始化对象时将该对象放入销毁栈中，当对象开始销毁时再依次销毁
         destroyStack.addLast(bean);
-        // 准备执行对象初始化后用户自定义的逻辑
-        initMethodExecute(bean);
+        // 准备执行对象初始化前用户自定义的逻辑
+        initBeforeMethodExecute(bean);
         earlySingletonObjects.put(beanName, bean);
         applyDependencies(bean, definition);
 
@@ -62,6 +63,7 @@ public class BeanFactory {
             singletonObjects.put(beanName, bean);
         }
         earlySingletonObjects.remove(beanName);
+        initAfterMethodExecute(bean);
         return bean;
     }
 
@@ -211,15 +213,34 @@ public class BeanFactory {
         }
     }
 
-    private void initMethodExecute(Object bean) {
+    private void initBeforeMethodExecute(Object bean) {
         Method[] methods = bean.getClass().getDeclaredMethods();
         for (Method method : methods) {
-            if (method.isAnnotationPresent(Init.class)) {
+            if (method.isAnnotationPresent(InitBefore.class)) {
                 // 如果方法上标注有该初始化注解
                 method.setAccessible(true);
                 Parameter[] parameters = method.getParameters();
                 if (parameters.length > 0) {
-                    throw new RuntimeException("the methods marked with the @Init annotation must not have parameters");
+                    throw new RuntimeException("the methods marked with the @InitBefore annotation must not have parameters");
+                }
+                try {
+                    method.invoke(bean);
+                } catch (InvocationTargetException | IllegalAccessException e) {
+                    throw new RuntimeException("TestNexus encounters any issues, please contact the author");
+                }
+            }
+        }
+    }
+
+    private void initAfterMethodExecute(Object bean) {
+        Method[] methods = bean.getClass().getDeclaredMethods();
+        for (Method method : methods) {
+            if (method.isAnnotationPresent(InitAfter.class)) {
+                // 如果方法上标注有该初始化注解
+                method.setAccessible(true);
+                Parameter[] parameters = method.getParameters();
+                if (parameters.length > 0) {
+                    throw new RuntimeException("the methods marked with the @InitAfter annotation must not have parameters");
                 }
                 try {
                     method.invoke(bean);
